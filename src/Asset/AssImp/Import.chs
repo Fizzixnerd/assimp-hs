@@ -2,6 +2,8 @@ module Asset.AssImp.Import where
 
 {#import Asset.AssImp.Types#}
 
+{#context lib = "assimp" prefix = "ai"#}
+
 #include <assimp/cimport.h>
 
 {#fun aiImportFile as ^

@@ -44,7 +44,7 @@ type AIReal = {#type ai_real#}
 
 #include <assimp/vector3.h>
 
-{#pointer *aiVector3 as ^ newtype#}
+{#pointer *aiVector3D as ^ newtype#}
 
 #include <assimp/color4.h>
 
@@ -166,7 +166,7 @@ type AIReal = {#type ai_real#}
   aiTextureType_NORMALS as TextureTypeNormals,
   aiTextureType_SHININESS as TextureTypeShininess,
   aiTextureType_OPACITY as TextureTypeOpacity,
-  aiTextureType_DISPLACEMENT as TextureTypeDisplacement
+  aiTextureType_DISPLACEMENT as TextureTypeDisplacement,
   aiTextureType_LIGHTMAP as TextureTypeLightMap,
   aiTextureType_REFLECTION as TextureTypeReflection,
   aiTextureType_UNKNOWN as TextureTypeUnknown}
@@ -224,13 +224,13 @@ type AIReal = {#type ai_real#}
 {#pointer *aiVectorKey as ^ newtype#}
 {#pointer *aiQuatKey as ^ newtype#}
 {#pointer *aiMeshKey as ^ newtype#}
-{#pointer *aiMeshMorphKey as newtype#}
+{#pointer *aiMeshMorphKey as ^ newtype#}
 
 {#enum aiAnimBehaviour as ^
- {aiAnimBehaviour_DEFAULT AnimBehaviorDefault,
-  aiAnimBehaviour_CONSTANT AnimBehaviourConstant,
-  aiAnimBehaviour_LINEAR AnimBehaviourLinear,
-  aiAnimBehaviour_REPEAT AnimBehaviourRepeat}
+ {aiAnimBehaviour_DEFAULT as AnimBehaviorDefault,
+  aiAnimBehaviour_CONSTANT as AnimBehaviourConstant,
+  aiAnimBehaviour_LINEAR as AnimBehaviourLinear,
+  aiAnimBehaviour_REPEAT as AnimBehaviourRepeat}
  omit (_aiAnimBehaviour_Force32Bit)
  deriving (Eq, Ord, Show)
 #}
@@ -254,5 +254,5 @@ type AIReal = {#type ai_real#}
  deriving (Eq, Ord, Show)
 #}
 
-{#pointer aiMetadataEntry as ^ newtype#}
-{#pointer aiMetadata as ^ newtype#}
+{#pointer *aiMetadataEntry as ^ newtype#}
+{#pointer *aiMetadata as ^ newtype#}

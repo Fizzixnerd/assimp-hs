@@ -1,10 +1,10 @@
 name:                assimp-hs
 version:             0.1.0.0
-github:              "githubuser/assimp-hs"
+github:              "Fizzixnerd/assimp-hs"
 license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2018 Author name here"
+author:              "Matt Walker"
+maintainer:          "matt.g.d.walker@gmail.com"
+copyright:           "2018 Matt Walker"
 
 extra-source-files:
 - README.md
