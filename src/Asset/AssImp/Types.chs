@@ -150,7 +150,7 @@ type AIReal = {#type ai_real#}
   aiTextureMapping_SPHERE as TextureMappingSphere,
   aiTextureMapping_CYLINDER as TextureMappingCylinder,
   aiTextureMapping_BOX as TextureMappingBox,
-  aiTextureMapping_PLANE as TextureMappingPlane
+  aiTextureMapping_PLANE as TextureMappingPlane,
   aiTextureMapping_OTHER as TextureMappingOther}
  omit (_aiTextureMapping_Force32Bit)
  deriving (Eq, Ord, Show)
@@ -175,173 +175,46 @@ type AIReal = {#type ai_real#}
 #}
 
 {#enum aiShadingMode as ^
---
+ {aiShadingMode_Flat as ShadingModeFlat,
+  aiShadingMode_Gouraud as ShadingModeGouraud,
+  aiShadingMode_Phong as ShadingModePhong,
+  aiShadingMode_Blinn as ShadingModeBlinn,
+  aiShadingMode_Toon as ShadingModeToon,
+  aiShadingMode_OrenNayar as ShadingModeOrenNayar,
+  aiShadingMode_Minnaert as ShadingModeMinnaert,
+  aiShadingMode_CookTorrance as ShadingModeCookTorrance,
+  aiShadingMode_NoShading as ShadingModeNoShading,
+  aiShadingMode_Fresnel as ShadingModeFresnel}
+ omit (_aiShadingMode_Force32Bit)
+ deriving (Eq, Ord, Show)
+#}
 
--- |
+{#enum aiTextureFlags as ^
+ {aiTextureFlags_Invert as TextureFlagsInvert,
+  aiTextureFlags_UseAlpha as TextureFlagsUseAlpha,
+  aiTextureFlags_IgnoreAlpha as TextureFlagsIgnoreAlpha}
+ omit (_aiTextureFlags_Force32Bit)
+ deriving (Eq, Ord, Show)
+#}
 
---
-{
-    /** Flat shading. Shading is done on per-face base,
-     *  diffuse only. Also known as 'faceted shading'.
-     */
-    aiShadingMode_Flat = 0x1,
-
-    /** Simple Gouraud shading.
-     */
-    aiShadingMode_Gouraud = 0x2,
-
-    /** Phong-Shading -
-     */
-    aiShadingMode_Phong = 0x3,
-
-    /** Phong-Blinn-Shading
-     */
-    aiShadingMode_Blinn = 0x4,
-
-    /** Toon-Shading per pixel
-     *
-     *  Also known as 'comic' shader.
-     */
-    aiShadingMode_Toon = 0x5,
-
-    /** OrenNayar-Shading per pixel
-     *
-     *  Extension to standard Lambertian shading, taking the
-     *  roughness of the material into account
-     */
-    aiShadingMode_OrenNayar = 0x6,
-
-    /** Minnaert-Shading per pixel
-     *
-     *  Extension to standard Lambertian shading, taking the
-     *  "darkness" of the material into account
-     */
-    aiShadingMode_Minnaert = 0x7,
-
-    /** CookTorrance-Shading per pixel
-     *
-     *  Special shader for metallic surfaces.
-     */
-    aiShadingMode_CookTorrance = 0x8,
-
-    /** No shading at all. Constant light influence of 1.0.
-    */
-    aiShadingMode_NoShading = 0x9,
-
-     /** Fresnel shading
-     */
-    aiShadingMode_Fresnel = 0xa,
-
-
-#ifndef SWIG
-    _aiShadingMode_Force32Bit = INT_MAX
-#endif
-};
-
-enum aiTextureFlags
-{
-    /** The texture's color values have to be inverted (componentwise 1-n)
-     */
-    aiTextureFlags_Invert = 0x1,
-
-    /** Explicit request to the application to process the alpha channel
-     *  of the texture.
-     *
-     *  Mutually exclusive with #aiTextureFlags_IgnoreAlpha. These
-     *  flags are set if the library can say for sure that the alpha
-     *  channel is used/is not used. If the model format does not
-     *  define this, it is left to the application to decide whether
-     *  the texture alpha channel - if any - is evaluated or not.
-     */
-    aiTextureFlags_UseAlpha = 0x2,
-
-    /** Explicit request to the application to ignore the alpha channel
-     *  of the texture.
-     *
-     *  Mutually exclusive with #aiTextureFlags_UseAlpha.
-     */
-    aiTextureFlags_IgnoreAlpha = 0x4,
-
-#ifndef SWIG
-      _aiTextureFlags_Force32Bit = INT_MAX
-#endif
-};
-
-enum aiBlendMode
-{
-    /**
-     *  Formula:
-     *  @code
-     *  SourceColor*SourceAlpha + DestColor*(1-SourceAlpha)
-     *  @endcode
-     */
-    aiBlendMode_Default = 0x0,
-
-    /** Additive blending
-     *
-     *  Formula:
-     *  @code
-     *  SourceColor*1 + DestColor*1
-     *  @endcode
-     */
-    aiBlendMode_Additive = 0x1,
-
-    // we don't need more for the moment, but we might need them
-    // in future versions ...
-
-#ifndef SWIG
-    _aiBlendMode_Force32Bit = INT_MAX
-#endif
-};
+{#enum aiBlendMode as ^
+ {aiBlendMode_Default as BlendModeDefault,
+  aiBlendMode_Additive as BlendModeAdditive}
+ omit (_aiBlendMode_Force32Bit)
+ deriving (Eq, Ord, Show)
+#}
 
 {#pointer *aiUVTransform as ^ newtype#}
 
-enum aiPropertyTypeInfo
-{
-    /** Array of single-precision (32 Bit) floats
-     *
-     *  It is possible to use aiGetMaterialInteger[Array]() (or the C++-API
-     *  aiMaterial::Get()) to query properties stored in floating-point format.
-     *  The material system performs the type conversion automatically.
-    */
-    aiPTI_Float   = 0x1,
-
-    /** Array of double-precision (64 Bit) floats
-     *
-     *  It is possible to use aiGetMaterialInteger[Array]() (or the C++-API
-     *  aiMaterial::Get()) to query properties stored in floating-point format.
-     *  The material system performs the type conversion automatically.
-    */
-    aiPTI_Double   = 0x2,
-
-    /** The material property is an aiString.
-     *
-     *  Arrays of strings aren't possible, aiGetMaterialString() (or the
-     *  C++-API aiMaterial::Get()) *must* be used to query a string property.
-    */
-    aiPTI_String  = 0x3,
-
-    /** Array of (32 Bit) integers
-     *
-     *  It is possible to use aiGetMaterialFloat[Array]() (or the C++-API
-     *  aiMaterial::Get()) to query properties stored in integer format.
-     *  The material system performs the type conversion automatically.
-    */
-    aiPTI_Integer = 0x4,
-
-
-    /** Simple binary buffer, content undefined. Not convertible to anything.
-    */
-    aiPTI_Buffer  = 0x5,
-
-
-     /** This value is not used. It is just there to force the
-     *  compiler to map this enum to a 32 Bit integer.
-     */
-#ifndef SWIG
-     _aiPTI_Force32Bit = INT_MAX
-#endif
-};
+{#enum aiPropertyTypeInfo as ^
+ {aiPTI_Float as PTIFloat,
+  aiPTI_Double as PTIDouble,
+  aiPTI_String as PTIString,
+  aiPTI_Integer as PTIInteger,
+  aiPTI_Buffer as PTIBuffer}
+ omit (_aiPTI_Force32Bit)
+ deriving (Eq, Ord, Show)
+#}
 
 {#pointer *aiMaterialProperty as ^ newtype#}
 {#pointer *aiMaterial as ^ newtype#}
@@ -353,30 +226,14 @@ enum aiPropertyTypeInfo
 {#pointer *aiMeshKey as ^ newtype#}
 {#pointer *aiMeshMorphKey as newtype#}
 
-enum aiAnimBehaviour
-{
-    /** The value from the default node transformation is taken*/
-    aiAnimBehaviour_DEFAULT  = 0x0,
-
-    /** The nearest key value is used without interpolation */
-    aiAnimBehaviour_CONSTANT = 0x1,
-
-    /** The value of the nearest two keys is linearly
-     *  extrapolated for the current time value.*/
-    aiAnimBehaviour_LINEAR   = 0x2,
-
-    /** The animation is repeated.
-     *
-     *  If the animation key go from n to m and the current
-     *  time is t, use the value at (t-n) % (|m-n|).*/
-    aiAnimBehaviour_REPEAT   = 0x3,
-
-    /** This value is not used, it is just here to force the
-     *  the compiler to map this enum to a 32 Bit integer  */
-#ifndef SWIG
-    _aiAnimBehaviour_Force32Bit = INT_MAX
-#endif
-};
+{#enum aiAnimBehaviour as ^
+ {aiAnimBehaviour_DEFAULT AnimBehaviorDefault,
+  aiAnimBehaviour_CONSTANT AnimBehaviourConstant,
+  aiAnimBehaviour_LINEAR AnimBehaviourLinear,
+  aiAnimBehaviour_REPEAT AnimBehaviourRepeat}
+ omit (_aiAnimBehaviour_Force32Bit)
+ deriving (Eq, Ord, Show)
+#}
 
 {#pointer *aiNodeAnim as ^ newtype#}
 {#pointer *aiMeshAnim as ^ newtype#}
@@ -385,19 +242,17 @@ enum aiAnimBehaviour
 
 #include <assimp/metadata.h>
 
-enum aiMetadataType {
-    AI_BOOL       = 0,
-    AI_INT32      = 1,
-    AI_UINT64     = 2,
-    AI_FLOAT      = 3,
-    AI_DOUBLE     = 4,
-    AI_AISTRING   = 5,
-    AI_AIVECTOR3D = 6,
-
-#ifndef SWIG
-    FORCE_32BIT = INT_MAX
-#endif
-}
+{#enum aiMetadataType as ^
+ {AI_BOOL as MetadataTypeBool,
+  AI_INT32 as MetadataTypeInt32,
+  AI_UINT64 as MetadataTypeUInt64,
+  AI_FLOAT as MetadataTypeFloat,
+  AI_DOUBLE as MetadataTypeDouble,
+  AI_AISTRING as MetadataTypeAIString,
+  AI_AIVECTOR3D as MetadataTypeAIVector3D}
+ omit (FORCE_32BIT)
+ deriving (Eq, Ord, Show)
+#}
 
 {#pointer aiMetadataEntry as ^ newtype#}
 {#pointer aiMetadata as ^ newtype#}
