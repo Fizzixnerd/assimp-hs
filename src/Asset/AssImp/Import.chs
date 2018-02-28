@@ -13,6 +13,13 @@ import Foreign.C.Types
    `CUInt' } -> `ScenePtr'
 #}
 
+importAndProcessFileFast :: String -> IO ScenePtr
+importAndProcessFileFast s = importFile s 0x808A
+
+importAndProcessFileGood :: String -> IO ScenePtr
+importAndProcessFileGood s = importFile s 0x888A
+
+
 {#fun aiImportFileEx as importFileEx
  { `String',
    `CUInt',

@@ -10,10 +10,8 @@ import Foreign.C.Types
 
 someFunc :: IO ()
 someFunc = do
-  scene <- importFile "/home/matt/src/haskell-game/res/models/simple-cube-2.obj" 0
-  nm <- sceneNumMeshes scene
-  unless (nm == 1) $
-    error "Wrong number of meshes."
+  scene <- importAndProcessFileFast "/home/matt/src/haskell-game/res/models/male.obj"
+  print =<< sceneNumMeshes scene
   meshes <- sceneMeshes scene
   m1 <- peekElemOff meshes 0
   print =<< meshNumVertices m1
@@ -31,4 +29,3 @@ someFunc = do
   bufferFaces m1
   
   releaseImport scene
-
