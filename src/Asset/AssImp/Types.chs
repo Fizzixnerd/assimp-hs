@@ -12,7 +12,9 @@ type AIReal = {#type ai_real#}
 {#pointer *aiPlane as Plane newtype#}
 {#pointer *aiRay as Ray newtype#}
 {#pointer *aiColor3D as Color3D newtype#}
-{#pointer *aiString as AIString newtype#}
+
+data AIString = AIString
+{#pointer *aiString as AIStringPtr -> AIString#}
 
 {#enum aiReturn as Return
  {aiReturn_SUCCESS as ReturnSuccess,
@@ -39,7 +41,8 @@ type AIReal = {#type ai_real#}
  deriving (Eq, Ord, Show)
 #}
 
-{#pointer *aiMemoryInfo as MemoryInfo newtype#}
+data MemoryInfo = MemoryInfo
+{#pointer *aiMemoryInfo as MemoryInfoPtr -> MemoryInfo#}
 
 #include <assimp/vector2.h>
 
@@ -47,15 +50,18 @@ type AIReal = {#type ai_real#}
 
 #include <assimp/vector3.h>
 
-{#pointer *aiVector3D as Vector3D newtype#}
+data Vector3D = Vector3D
+{#pointer *aiVector3D as Vector3DPtr -> Vector3D#}
 
 #include <assimp/color4.h>
 
-{#pointer *aiColor4D as Color4D newtype#}
+data Color4D = Color4D
+{#pointer *aiColor4D as Color4DPtr -> Color4D#}
 
 #include <assimp/quaternion.h>
 
-{#pointer *aiQuaternion as Quaternion newtype#}
+data Quaternion = Quaternion
+{#pointer *aiQuaternion as QuaternionPtr -> Quaternion#}
 
 #include <assimp/matrix3x3.h>
 
@@ -63,13 +69,44 @@ type AIReal = {#type ai_real#}
 
 #include <assimp/matrix4x4.h>
 
-{#pointer *aiMatrix4x4 as Matrix4x4 newtype#}
+data Matrix4x4 = Matrix4x4
+{#pointer *aiMatrix4x4 as Matrix4x4Ptr -> Matrix4x4#}
 
 #include <assimp/mesh.h>
 
-{#pointer *aiFace as Face newtype#}
-{#pointer *aiVertexWeight as VertexWeight newtype#}
-{#pointer *aiBone as Bone newtype#}
+data Face = Face
+{#pointer *aiFace as FacePtr -> Face#}
+
+faceNumIndices :: FacePtr -> IO CUInt
+faceNumIndices = {#get struct Face->mNumIndices#}
+
+faceIndices :: FacePtr -> IO (Ptr CUInt)
+faceIndices = {#get struct Face->mIndices#}
+
+data VertexWeight = VertexWeight
+{#pointer *aiVertexWeight as VertexWeightPtr -> VertexWeight#}
+
+vertexWeightVertexID :: VertexWeightPtr -> IO CUInt
+vertexWeightVertexID = {#get struct VertexWeight->mVertexId#}
+
+vertexWeightWeight :: VertexWeightPtr -> IO Float
+vertexWeightWeight vw = (\(CFloat x) -> x) <$> 
+                        {#get struct VertexWeight->mWeight#} vw
+
+data Bone = Bone
+{#pointer *aiBone as BonePtr -> Bone#}
+
+boneName :: BonePtr -> IO AIStringPtr
+boneName b = castPtr <$> {#get struct Bone->mName#} b
+
+boneNumWeights :: BonePtr -> IO CUInt
+boneNumWeights = {#get struct Bone->mNumWeights#}
+
+boneWeights :: BonePtr -> IO VertexWeightPtr
+boneWeights b = castPtr <$> {#get struct Bone->mWeights#} b 
+
+boneOffsetMatrix :: BonePtr -> IO Matrix4x4Ptr
+boneOffsetMatrix b = castPtr <$> {#get struct Bone->mOffsetMatrix#} b
 
 {#enum aiPrimitiveType as PrimitiveType
  {aiPrimitiveType_POINT as PrimitiveTypePoint,
@@ -85,43 +122,150 @@ type AIReal = {#type ai_real#}
 {#enum aiMorphingMethod as MorphingMethod
  {aiMorphingMethod_VERTEX_BLEND as MorphingMethodVertexBlend,
   aiMorphingMethod_MORPH_NORMALIZED as MorphingMethodMorphNormalized,
-  airMorphingMethod_MORPH_RELATIVE as MorphingMethodMorphRelative}
+  aiMorphingMethod_MORPH_RELATIVE as MorphingMethodMorphRelative}
  omit (_aiMorphingMethod_Force32Bit)
  deriving (Eq, Ord, Show)
 #}
 
-{#pointer *aiMesh as Mesh newtype#}
+data Mesh = Mesh
+{#pointer *aiMesh as MeshPtr -> Mesh#}
+
+meshPrimitiveTypes :: MeshPtr -> IO CUInt
+meshPrimitiveTypes = {#get struct Mesh->mPrimitiveTypes#}
+
+meshNumVertices :: MeshPtr -> IO CUInt
+meshNumVertices = {#get struct Mesh->mNumVertices#}
+
+meshNumFaces :: MeshPtr -> IO CUInt
+meshNumFaces = {#get struct Mesh->mNumFaces#}
+
+meshVertices :: MeshPtr -> IO Vector3DPtr
+meshVertices = {#get struct Mesh->mVertices#}
+
+meshNormals :: MeshPtr -> IO Vector3DPtr
+meshNormals = {#get struct Mesh->mNormals#}
+
+meshTangents :: MeshPtr -> IO Vector3DPtr
+meshTangents = {#get struct Mesh->mTangents#}
+
+meshBitangents :: MeshPtr -> IO Vector3DPtr
+meshBitangents = {#get struct Mesh->mBitangents#}
+
+meshColors :: MeshPtr -> IO (Ptr Color4DPtr)
+meshColors = {#get struct Mesh->mColors#}
+
+meshTextureCoords :: MeshPtr -> IO (Ptr Vector3DPtr)
+meshTextureCoords = {#get struct Mesh->mTextureCoords#}
+
+meshNumUVComponents :: MeshPtr -> IO (Ptr CUInt)
+meshNumUVComponents = {#get struct Mesh->mNumUVComponents#}
+
+meshFaces :: MeshPtr -> IO FacePtr
+meshFaces = {#get struct Mesh->mFaces#}
+
+meshNumBones :: MeshPtr -> IO CUInt
+meshNumBones = {#get struct Mesh->mNumBones#}
+
+meshBones :: MeshPtr -> IO (Ptr BonePtr)
+meshBones = {#get struct Mesh->mBones#}
+
+meshMaterialIndex :: MeshPtr -> IO CUInt
+meshMaterialIndex = {#get struct Mesh->mMaterialIndex#}
+
+meshName :: MeshPtr -> IO AIStringPtr
+meshName m = castPtr <$> {#get struct Mesh->mName#} m
 
 #include <assimp/cimport.h>
 
-{#pointer *aiLogStream as LogStream newtype#}
-{#pointer *aiPropertyStore as PropertyStore newtype#}
+data LogStream = LogStream
+{#pointer *aiLogStream as LogStreamPtr -> LogStream#}
+
+data PropertyStore = PropertyStore
+{#pointer *aiPropertyStore as PropertyStorePtr -> PropertyStore#}
 
 #include <assimp/scene.h>
 
-{#pointer *aiNode as Node newtype#}
+data Node = Node
+{#pointer *aiNode as NodePtr -> Node#}
 
---nodeName :: Node -> IO AIString
---nodeName (Node n) = {#get struct Node->mName#} n
+nodeName :: NodePtr -> IO AIStringPtr
+nodeName n = castPtr <$> {#get struct Node->mName#} n
 
---nodeTransformation :: Node -> IO Matrix4x4
---nodeTransformation n = Matrix4x4 <$> castPtr <$> {#get struct Node->mTransformation#} n
+nodeTransformation :: NodePtr -> IO Matrix4x4Ptr
+nodeTransformation n = castPtr <$> {#get struct Node->mTransformation#} n
 
-nodeParent :: Node -> IO Node
-nodeParent n = {#get struct Node->mParent#} n
+nodeParent :: NodePtr -> IO NodePtr
+nodeParent = {#get struct Node->mParent#}
 
-{#pointer *aiScene as Scene newtype#}
+nodeNumChildren :: NodePtr -> IO CUInt
+nodeNumChildren = {#get struct Node->mNumChildren#}
 
-sceneFlags :: Scene -> IO CUInt
-sceneFlags (Scene s) = {#get struct Scene->mFlags#} s
+nodeChildren :: NodePtr -> IO (Ptr NodePtr)
+nodeChildren = {#get struct Node->mChildren#}
 
---sceneRootNode :: Scene -> IO Node
---sceneRootNode (Scene s) = {#get struct Scene->mRootNode#} s
+nodeNumMeshes :: NodePtr -> IO CUInt
+nodeNumMeshes = {#get struct Node->mNumMeshes#}
+
+nodeMeshes :: NodePtr -> IO (Ptr CUInt)
+nodeMeshes = {#get struct Node->mMeshes#}
+
+nodeMetadata :: NodePtr -> IO MetadataPtr
+nodeMetadata n = castPtr <$> {#get struct Node->mMetaData#} n
+
+data Scene = Scene
+{#pointer *aiScene as ScenePtr -> Scene#}
+
+sceneFlags :: ScenePtr -> IO CUInt
+sceneFlags = {#get struct Scene->mFlags#}
+
+sceneRootNode :: ScenePtr -> IO NodePtr
+sceneRootNode = {#get struct Scene->mRootNode#}
+
+sceneNumMeshes :: ScenePtr -> IO CUInt
+sceneNumMeshes = {#get struct Scene->mNumMeshes#}
+
+sceneMeshes :: ScenePtr -> IO (Ptr MeshPtr)
+sceneMeshes = {#get struct Scene->mMeshes#}
+
+sceneNumMaterials :: ScenePtr -> IO CUInt
+sceneNumMaterials = {#get struct Scene->mNumMaterials#}
+
+sceneMaterials :: ScenePtr -> IO (Ptr MaterialPtr)
+sceneMaterials s = castPtr <$> {#get struct Scene->mMaterials#} s
+
+sceneNumAnimations :: ScenePtr -> IO CUInt
+sceneNumAnimations = {#get struct Scene->mNumAnimations#}
+
+sceneAnimations :: ScenePtr -> IO (Ptr AnimationPtr)
+sceneAnimations s = castPtr <$> {#get struct Scene->mAnimations#} s
+
+sceneNumTextures :: ScenePtr -> IO CUInt
+sceneNumTextures = {#get struct Scene->mNumTextures#}
+
+sceneTextures :: ScenePtr -> IO (Ptr TexturePtr)
+sceneTextures s = castPtr <$> {#get struct Scene->mTextures#} s
+
+sceneNumLights :: ScenePtr -> IO CUInt
+sceneNumLights = {#get struct Scene->mNumLights#}
+
+sceneLights :: ScenePtr -> IO (Ptr LightPtr)
+sceneLights s = castPtr <$> {#get struct Scene->mLights#} s
+
+sceneNumCameras :: ScenePtr -> IO CUInt
+sceneNumCameras = {#get struct Scene->mNumCameras#}
+
+sceneCameras :: ScenePtr -> IO (Ptr CameraPtr)
+sceneCameras s = castPtr <$> {#get struct Scene->mCameras#} s
+
+sceneMetadata :: ScenePtr -> IO MetadataPtr
+sceneMetadata s = castPtr <$> {#get struct Scene->mMetaData#} s
 
 #include <assimp/texture.h>
 
 {#pointer *aiTexel as Texel newtype#}
-{#pointer *aiTexture as Texture newtype#}
+
+data Texture = Texture
+{#pointer *aiTexture as TexturePtr -> Texture#}
 
 #include <assimp/light.h>
 
@@ -136,11 +280,13 @@ sceneFlags (Scene s) = {#get struct Scene->mFlags#} s
  deriving (Eq, Ord, Show)
 #}
 
-{#pointer *aiLight as Light newtype#}
+data Light = Light
+{#pointer *aiLight as LightPtr -> Light#}
 
 #include <assimp/camera.h>
 
-{#pointer *aiCamera as Camera newtype#}
+data Camera = Camera
+{#pointer *aiCamera as CameraPtr -> Camera#}
 
 #include <assimp/material.h>
 
@@ -236,7 +382,9 @@ sceneFlags (Scene s) = {#get struct Scene->mFlags#} s
 #}
 
 {#pointer *aiMaterialProperty as MaterialProperty newtype#}
-{#pointer *aiMaterial as Material newtype#}
+
+data Material = Material
+{#pointer *aiMaterial as MaterialPtr -> Material#}
 
 #include <assimp/anim.h>
 
@@ -257,7 +405,9 @@ sceneFlags (Scene s) = {#get struct Scene->mFlags#} s
 {#pointer *aiNodeAnim as NodeAnim newtype#}
 {#pointer *aiMeshAnim as MeshAnim newtype#}
 {#pointer *aiMeshMorphAnim as MeshMorphAnim newtype#}
-{#pointer *aiAnimation as Animation newtype#}
+
+data Animation = Animation
+{#pointer *aiAnimation as AnimationPtr -> Animation#}
 
 #include <assimp/metadata.h>
 
@@ -274,7 +424,9 @@ sceneFlags (Scene s) = {#get struct Scene->mFlags#} s
 #}
 
 {#pointer *aiMetadataEntry as MetadataEntry newtype#}
-{#pointer *aiMetadata as Metadata newtype#}
+
+data Metadata = Metadata
+{#pointer *aiMetadata as MetadataPtr -> Metadata#}
 
 #include <assimp/cexport.h>
 
@@ -283,4 +435,5 @@ sceneFlags (Scene s) = {#get struct Scene->mFlags#} s
 
 #include <assimp/cfileio.h>
 
-{#pointer *aiFileIO as FileIO newtype#}
+data FileIO = FileIO
+{#pointer *aiFileIO as FileIOPtr -> FileIO#}

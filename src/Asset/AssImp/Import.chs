@@ -1,6 +1,7 @@
 module Asset.AssImp.Import where
 
 {#import Asset.AssImp.Types#}
+import Foreign
 import Foreign.C.Types
 
 {#context lib = "assimp"#}
@@ -9,90 +10,90 @@ import Foreign.C.Types
 
 {#fun aiImportFile as importFile
  { `String',
-   `CUInt' } -> `Scene'
+   `CUInt' } -> `ScenePtr'
 #}
 
 {#fun aiImportFileEx as importFileEx
  { `String',
    `CUInt',
-   `FileIO' } -> `Scene'
+   `FileIOPtr' } -> `ScenePtr'
 #}
 
-{#fun aiImportFileExWithProperties as ^
+{#fun aiImportFileExWithProperties as importFileExWithPropertes
  { `String',
    `CUInt',
-   `FileIO',
-   `PropertyStore' } -> `Scene'
+   `FileIOPtr',
+   `PropertyStorePtr' } -> `ScenePtr'
 #}
 
-{#fun aiImportFileFromMemory as ^
+{#fun aiImportFileFromMemory as importFileFromMemory
  { `String',
    `CUInt',
    `CUInt',
-   `String' } -> `Scene'
+   `String' } -> `ScenePtr'
 #}
 
-{#fun aiImportFileFromMemoryWithProperties as ^
+{#fun aiImportFileFromMemoryWithProperties as importFileFromMemoryWithProperties
  { `String',
    `CUInt',
    `CUInt',
    `String',
-   `PropertyStore' } -> `Scene'
+   `PropertyStorePtr' } -> `ScenePtr'
 #}
 
-{#fun aiApplyPostProcessing as ^
- { `Scene',
-   `CUInt' } -> `Scene'
+{#fun aiApplyPostProcessing as applyPostProcessing
+ { `ScenePtr',
+   `CUInt' } -> `ScenePtr'
 #}
 
-{#fun aiGetPredefinedLogStream as ^
- { `DefaultLogStream',
-   `String' } -> `LogStream'
+-- {#fun aiGetPredefinedLogStream as ^
+--  { `DefaultLogStream',
+--   `String' } -> `LogStreamPtr'
+-- #}
+
+{#fun aiAttachLogStream as attachLogStream
+ { `LogStreamPtr' } -> `()'
 #}
 
-{#fun aiAttachLogStream as ^
- { `LogStream' } -> `()'
-#}
-
-{#fun aiEnableVerboseLogging as ^
+{#fun aiEnableVerboseLogging as enableVerboseLogging
  { `Bool' } -> `()'
 #}
 
-{#fun aiDetachLogStream as ^
- { `LogStream' } -> `Return'
+{#fun aiDetachLogStream as detachLogStream
+ { `LogStreamPtr' } -> `Return'
 #}
 
-{#fun aiDetachAllLogStreams as ^
+{#fun aiDetachAllLogStreams as detachAllLogStreams
  {} -> `()'
 #}
 
-{#fun aiReleaseImport as ^
- { `Scene' } -> `()'
+{#fun aiReleaseImport as releaseImport
+ { `ScenePtr' } -> `()'
 #}
 
-{#fun aiGetErrorString as ^
+{#fun aiGetErrorString as getErrorString
  {} -> `String'
 #}
 
-{#fun aiIsExtensionSupported as ^
+{#fun aiIsExtensionSupported as isExtensionSupported
  { `String' } -> `Bool'
 #}
 
-{#fun aiGetExtensionList as ^
- { `AIString' } -> `()'
+{#fun aiGetExtensionList as getExtensionList
+ { `AIStringPtr' } -> `()'
 #}
 
-{#fun aiGetMemoryRequirements as ^
- { `Scene',
-   alloca- `MemoryInfo' peek*} -> `()'
+-- {#fun aiGetMemoryRequirements as ^
+-- { `ScenePtr',
+--   alloca- `MemoryInfoPtr' peek*} -> `()'
+-- #}
+
+{#fun aiCreatePropertyStore as createPropertyStore
+ {} -> `PropertyStorePtr'
 #}
 
-{#fun aiCreatePropertyStore as ^
- {} -> `PropertyStore'
-#}
-
-{#fun aiReleasePropertyStore as ^
- { `PropertyStore' } -> `()'
+{#fun aiReleasePropertyStore as releasePropertyStore
+ { `PropertyStorePtr' } -> `()'
 #}
 
 -- {#fun aiSetImportPropertyInteger
