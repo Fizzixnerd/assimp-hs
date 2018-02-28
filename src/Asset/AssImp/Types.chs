@@ -1,9 +1,13 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Asset.AssImp.Types where
 
 import Foreign
 import Foreign.C.Types
 import Foreign.C.String
 import Foreign.ForeignPtr
+import Foreign.Marshal.Utils
+import Control.Monad
 import qualified Data.Vector.Storable as V
 
 {#context lib = "assimp" prefix = "ai"#}
@@ -107,6 +111,30 @@ peekFace f = do
   indices <- faceIndices f
   indices' <- (newForeignPtr_ indices)
   return $ V.unsafeFromForeignPtr0 indices' (fromIntegral n)
+
+sizeOfFace = {#sizeof Face#}
+
+-- | Buffer the nth Face
+bufferFace :: Int -> FacePtr -> Ptr CUInt -> IO ()
+bufferFace nEle f buf = do
+  fIndices <- faceIndices f
+  copyBytes buf fIndices (sizeOf (0 :: CUInt) * nEle)
+
+-- | Assumes separation, so that a mesh contains only one type of
+-- primitive.
+bufferFaces :: MeshPtr -> IO (Ptr CUInt, Int)
+bufferFaces m = do
+  nFaces <- meshNumFaces m
+  faces  <- meshFaces m
+  if nFaces > 0
+    then do
+    pointsPerFace <- faceNumIndices faces
+    let nPoints = fromIntegral $ pointsPerFace * nFaces
+    buf :: Ptr CUInt <- mallocArray nPoints
+    forM_ [0..((fromIntegral nFaces)-1)] $ \n -> do
+      bufferFace (fromIntegral pointsPerFace) (plusPtr faces (n * (fromIntegral sizeOfFace))) buf
+    return (buf, nPoints)
+    else return (nullPtr, 0)
 
 data VertexWeight = VertexWeight
 {#pointer *aiVertexWeight as VertexWeightPtr -> VertexWeight#}
