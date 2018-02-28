@@ -2,6 +2,9 @@ module Asset.AssImp.Types where
 
 import Foreign
 import Foreign.C.Types
+import Foreign.C.String
+import Foreign.ForeignPtr
+import qualified Data.Vector.Storable as V
 
 {#context lib = "assimp" prefix = "ai"#}
 
@@ -15,6 +18,20 @@ type AIReal = {#type ai_real#}
 
 data AIString = AIString
 {#pointer *aiString as AIStringPtr -> AIString#}
+
+aiStringLength :: AIStringPtr -> IO CULong
+aiStringLength = {#get struct aiString->length#}
+
+aiStringData :: AIStringPtr -> IO (Ptr CChar)
+aiStringData = {#get struct aiString->data#}
+
+peekAIString :: AIStringPtr -> IO String
+peekAIString s = if s /= nullPtr 
+  then do
+  d <- aiStringData s
+  len <- aiStringLength s
+  peekCStringLen (d, fromIntegral len)
+  else return ""
 
 {#enum aiReturn as Return
  {aiReturn_SUCCESS as ReturnSuccess,
@@ -65,7 +82,8 @@ data Quaternion = Quaternion
 
 #include <assimp/matrix3x3.h>
 
-{#pointer *aiMatrix3x3 as Matrix3x3 newtype#}
+data Matrix3x3 = Matrix3x3
+{#pointer *aiMatrix3x3 as Matrix3x3Ptr -> Matrix3x3#}
 
 #include <assimp/matrix4x4.h>
 
@@ -82,6 +100,13 @@ faceNumIndices = {#get struct Face->mNumIndices#}
 
 faceIndices :: FacePtr -> IO (Ptr CUInt)
 faceIndices = {#get struct Face->mIndices#}
+
+peekFace :: FacePtr -> IO (V.Vector CUInt)
+peekFace f = do
+  n <- faceNumIndices f
+  indices <- faceIndices f
+  indices' <- (newForeignPtr_ indices)
+  return $ V.unsafeFromForeignPtr0 indices' (fromIntegral n)
 
 data VertexWeight = VertexWeight
 {#pointer *aiVertexWeight as VertexWeightPtr -> VertexWeight#}
@@ -136,9 +161,6 @@ meshPrimitiveTypes = {#get struct Mesh->mPrimitiveTypes#}
 meshNumVertices :: MeshPtr -> IO CUInt
 meshNumVertices = {#get struct Mesh->mNumVertices#}
 
-meshNumFaces :: MeshPtr -> IO CUInt
-meshNumFaces = {#get struct Mesh->mNumFaces#}
-
 meshVertices :: MeshPtr -> IO Vector3DPtr
 meshVertices = {#get struct Mesh->mVertices#}
 
@@ -159,6 +181,9 @@ meshTextureCoords = {#get struct Mesh->mTextureCoords#}
 
 meshNumUVComponents :: MeshPtr -> IO (Ptr CUInt)
 meshNumUVComponents = {#get struct Mesh->mNumUVComponents#}
+
+meshNumFaces :: MeshPtr -> IO CUInt
+meshNumFaces = {#get struct Mesh->mNumFaces#}
 
 meshFaces :: MeshPtr -> IO FacePtr
 meshFaces = {#get struct Mesh->mFaces#}
