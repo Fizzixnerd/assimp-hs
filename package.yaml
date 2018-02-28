@@ -25,6 +25,12 @@ dependencies:
 library:
   source-dirs: src
 
+extra-libraries:
+  - assimp
+
+extra-lib-dirs:
+  - /usr/local/lib/
+
 executables:
   assimp-hs-exe:
     main:                Main.hs

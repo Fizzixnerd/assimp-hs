@@ -1,47 +1,48 @@
 module Asset.AssImp.Import where
 
 {#import Asset.AssImp.Types#}
+import Foreign.C.Types
 
-{#context lib = "assimp" prefix = "ai"#}
+{#context lib = "assimp"#}
 
 #include <assimp/cimport.h>
 
-{#fun aiImportFile as ^
+{#fun aiImportFile as importFile
  { `String',
-   `Word' } -> `Scene'
+   `CUInt' } -> `Scene'
 #}
 
-{#fun aiImportFileEx as ^
+{#fun aiImportFileEx as importFileEx
  { `String',
-   `Word',
+   `CUInt',
    `FileIO' } -> `Scene'
 #}
 
 {#fun aiImportFileExWithProperties as ^
  { `String',
-   `Word',
+   `CUInt',
    `FileIO',
    `PropertyStore' } -> `Scene'
 #}
 
 {#fun aiImportFileFromMemory as ^
  { `String',
-   `Word',
-   `Word',
+   `CUInt',
+   `CUInt',
    `String' } -> `Scene'
 #}
 
 {#fun aiImportFileFromMemoryWithProperties as ^
  { `String',
-   `Word',
-   `Word',
+   `CUInt',
+   `CUInt',
    `String',
    `PropertyStore' } -> `Scene'
 #}
 
 {#fun aiApplyPostProcessing as ^
  { `Scene',
-   `Word' } -> `Scene'
+   `CUInt' } -> `Scene'
 #}
 
 {#fun aiGetPredefinedLogStream as ^
@@ -61,7 +62,7 @@ module Asset.AssImp.Import where
  { `LogStream' } -> `Return'
 #}
 
-{#fun aiDetatchAllLogStreams as ^
+{#fun aiDetachAllLogStreams as ^
  {} -> `()'
 #}
 
