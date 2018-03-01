@@ -127,22 +127,24 @@ sizeOfFace = {#sizeof Face#}
 bufferFace :: Int -> FacePtr -> Ptr CUInt -> IO ()
 bufferFace nEle f buf = do
   fIndices <- faceIndices f
-  copyBytes buf fIndices (sizeOf (0 :: CUInt) * nEle)
+  copyBytes buf fIndices (nEle * sizeOf (0 :: CUInt))
 
 -- | Assumes separation, so that a mesh contains only one type of
 -- primitive.
 bufferFaces :: MeshPtr -> IO (Ptr CUInt, Int)
 bufferFaces m = do
-  nFaces <- meshNumFaces m
+  nFaces <- fromIntegral <$> meshNumFaces m
   faces  <- meshFaces m
   if nFaces > 0
     then do
-    pointsPerFace <- faceNumIndices faces
-    let nPoints = fromIntegral $ pointsPerFace * nFaces
-    buf :: Ptr CUInt <- mallocArray nPoints
-    forM_ [0..((fromIntegral nFaces)-1)] $ \n -> do
-      bufferFace (fromIntegral pointsPerFace) (plusPtr faces (n * (fromIntegral sizeOfFace))) (plusPtr buf (fromIntegral n * fromIntegral pointsPerFace * (fromIntegral $ sizeOf (0 :: CUInt))))
-    return (buf, nPoints)
+    nEle <- fromIntegral <$> faceNumIndices faces
+    let nTotal = fromIntegral $ nEle * nFaces
+    buf :: Ptr CUInt <- mallocArray nTotal
+    forM_ [0..(nFaces - 1)] $ \n -> do
+      let bufOffset = n * nEle * sizeOf (0 :: CUInt)
+          facesOffset = n * sizeOfFace
+      bufferFace nEle (faces `plusPtr` facesOffset) (buf `plusPtr` bufOffset)
+    return (buf, nTotal)
     else return (nullPtr, 0)
 
 data VertexWeight = VertexWeight

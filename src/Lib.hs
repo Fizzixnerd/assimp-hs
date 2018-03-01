@@ -35,7 +35,7 @@ someFunc = do
   print =<< peekZVector3D =<< peek =<< meshTextureCoords m1
 
   fces <- bufferFaces m1
-  print =<< (peek $ fst fces)
+  print =<< (peekElemOff (fst fces) 5)
   print $ snd fces
   
   releaseImport scene
