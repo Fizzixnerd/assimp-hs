@@ -30,7 +30,7 @@ aiStringData :: AIStringPtr -> IO (Ptr CChar)
 aiStringData = {#get struct aiString->data#}
 
 peekAIString :: AIStringPtr -> IO String
-peekAIString s = if s /= nullPtr 
+peekAIString s = if s /= nullPtr
   then do
   d <- aiStringData s
   len <- aiStringLength s
@@ -73,6 +73,15 @@ data MemoryInfo = MemoryInfo
 
 data Vector3D = Vector3D
 {#pointer *aiVector3D as Vector3DPtr -> Vector3D#}
+
+peekXVector3D :: Vector3DPtr -> IO AIReal
+peekXVector3D v3d = peek $ castPtr v3d
+
+peekYVector3D :: Vector3DPtr -> IO AIReal
+peekYVector3D v3d = peekElemOff (castPtr v3d) 1
+
+peekZVector3D :: Vector3DPtr -> IO AIReal
+peekZVector3D v3d = peekElemOff (castPtr v3d) 2
 
 #include <assimp/color4.h>
 

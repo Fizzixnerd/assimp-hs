@@ -10,7 +10,7 @@ import Foreign.C.Types
 
 someFunc :: IO ()
 someFunc = do
-  scene <- importAndProcessFileFast "/home/matt/src/haskell-game/res/models/male.obj"
+  scene <- importAndProcessFileFast "/home/matt/src/haskell-game/res/models/simple-cube-2.obj"
   print =<< sceneNumMeshes scene
   meshes <- sceneMeshes scene
   m1 <- peekElemOff meshes 0
@@ -25,6 +25,7 @@ someFunc = do
   print =<< nodeNumChildren c1
   -- putStrLn =<< peekAIString =<< nodeName c2
   print =<< meshNumFaces m1
+  print =<< peekXVector3D =<< meshVertices m1
 
   bufferFaces m1
   
