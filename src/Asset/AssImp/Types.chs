@@ -141,7 +141,7 @@ bufferFaces m = do
     let nPoints = fromIntegral $ pointsPerFace * nFaces
     buf :: Ptr CUInt <- mallocArray nPoints
     forM_ [0..((fromIntegral nFaces)-1)] $ \n -> do
-      bufferFace (fromIntegral pointsPerFace) (plusPtr faces (n * (fromIntegral sizeOfFace))) buf
+      bufferFace (fromIntegral pointsPerFace) (plusPtr faces (n * (fromIntegral sizeOfFace))) (plusPtr buf (fromIntegral n * fromIntegral pointsPerFace * (fromIntegral $ sizeOf (0 :: CUInt))))
     return (buf, nPoints)
     else return (nullPtr, 0)
 
