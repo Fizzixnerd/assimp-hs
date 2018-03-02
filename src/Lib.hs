@@ -7,10 +7,11 @@ import Asset.AssImp.Import
 import Control.Monad
 import Foreign
 import Foreign.C.Types
+import System.Directory
 
 someFunc :: IO ()
-someFunc = do
-  scene <- importAndProcessFileGood "/home/matt/src/haskell-game/res/models/simple-cube-2.obj"
+someFunc = withCurrentDirectory "/home/matt/src/haskell-game/res/models/Bayonetta 1" $ do
+  scene <- importAndProcessFileGood "/home/matt/src/haskell-game/res/models/Bayonetta 1/bayo_default.dae"
   print =<< sceneNumMeshes scene
   meshes <- sceneMeshes scene
   m1 <- peekElemOff meshes 0
@@ -37,5 +38,14 @@ someFunc = do
   fces <- bufferFaces m1
   print =<< (peekElemOff (fst fces) 5)
   print $ snd fces
+
+  print =<< sceneNumTextures scene
+  tex <- sceneTextures scene
+  print =<< (peekAIString $ nodeName root)
+  --  print =<< peekTexelBGRA =<< textureData =<< peek tex
+
+  print =<< sceneNumMaterials scene
+  mat <- peek =<< sceneMaterials scene
+  print =<< materialTexture mat TextureTypeDiffuse
   
   releaseImport scene

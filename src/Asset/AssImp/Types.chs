@@ -37,6 +37,14 @@ peekAIString s = if s /= nullPtr
   peekCStringLen (d, fromIntegral len)
   else return ""
 
+peekAIStringFree :: AIStringPtr -> IO String
+peekAIStringFree s = do
+  s' <- peekAIString s
+  free s
+  return s'
+
+allocaAIString = allocaBytes {#sizeof aiString#}
+
 {#enum aiReturn as Return
  {aiReturn_SUCCESS as ReturnSuccess,
   aiReturn_FAILURE as ReturnFailure,
@@ -252,11 +260,11 @@ data PropertyStore = PropertyStore
 data Node = Node
 {#pointer *aiNode as NodePtr -> Node#}
 
-nodeName :: NodePtr -> IO AIStringPtr
-nodeName n = castPtr <$> {#get struct Node->mName#} n
+nodeName :: NodePtr -> AIStringPtr
+nodeName n = castPtr $ n `plusPtr` {#offsetof Node->mName#}
 
-nodeTransformation :: NodePtr -> IO Matrix4x4Ptr
-nodeTransformation n = castPtr <$> {#get struct Node->mTransformation#} n
+nodeTransformation :: NodePtr -> Matrix4x4Ptr
+nodeTransformation n = castPtr $ n `plusPtr` {#offsetof Node->mTransformation#}
 
 nodeParent :: NodePtr -> IO NodePtr
 nodeParent = {#get struct Node->mParent#}
@@ -326,10 +334,32 @@ sceneMetadata s = castPtr <$> {#get struct Scene->mMetaData#} s
 
 #include <assimp/texture.h>
 
-{#pointer *aiTexel as Texel newtype#}
+data Texel = Texel
+{#pointer *aiTexel as TexelPtr -> Texel#}
+
+peekTexelBGRA :: TexelPtr -> IO (CUChar, CUChar, CUChar, CUChar)
+peekTexelBGRA t = do
+  let t' = castPtr t :: Ptr CUChar
+  b <- peekElemOff t' 0
+  g <- peekElemOff t' 1
+  r <- peekElemOff t' 2
+  a <- peekElemOff t' 3
+  return (b, g, r, a)
 
 data Texture = Texture
 {#pointer *aiTexture as TexturePtr -> Texture#}
+
+textureWidth :: TexturePtr -> IO CUInt
+textureWidth = {#get Texture->mWidth#}
+
+textureHeight :: TexturePtr -> IO CUInt
+textureHeight = {#get Texture->mHeight#}
+
+textureData :: TexturePtr -> IO TexelPtr
+textureData = {#get Texture->pcData#}
+
+textureFilename :: TexturePtr -> AIStringPtr
+textureFilename t = t `plusPtr` {#offsetof Texture->mFilename#}
 
 #include <assimp/light.h>
 
@@ -445,10 +475,42 @@ data Camera = Camera
  deriving (Eq, Ord, Show)
 #}
 
-{#pointer *aiMaterialProperty as MaterialProperty newtype#}
+data MaterialProperty = MaterialProperty
+{#pointer *aiMaterialProperty as MaterialPropertyPtr -> MaterialProperty#}
 
 data Material = Material
 {#pointer *aiMaterial as MaterialPtr -> Material#}
+
+materialProperties :: MaterialPtr -> IO (Ptr MaterialPropertyPtr)
+materialProperties = {#get Material->mProperties#}
+
+materialNumProperties :: MaterialPtr -> IO CUInt
+materialNumProperties = {#get Material->mNumProperties#}
+
+peekMaterialProperties :: MaterialPtr -> IO (V.Vector MaterialPropertyPtr)
+peekMaterialProperties m = do
+  ps <- materialProperties m
+  n  <- materialNumProperties m
+  ps' <- newForeignPtr_ ps
+  return $ V.unsafeFromForeignPtr0 ps' (fromIntegral n)
+
+{#fun aiGetMaterialTexture as getMaterialTexture
+ { `MaterialPtr',
+   `TextureType',
+   `CInt',
+   allocaAIString- `String' peekAIString*,
+   alloca- `CInt' peek*,
+   alloca- `CUInt' peek*,
+   alloca- `AIReal' peek*,
+   alloca- `CInt' peek*,
+   alloca- `CInt' peek*,
+   alloca- `CUInt' peek*} -> `Return'
+#}
+
+materialTexture :: MaterialPtr -> TextureType -> IO FilePath
+materialTexture m tt = do
+  (_, s, _, _, _, _, _, _) <- getMaterialTexture m tt 0
+  return s
 
 #include <assimp/anim.h>
 
