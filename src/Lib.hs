@@ -45,7 +45,8 @@ someFunc = withCurrentDirectory "/home/matt/src/haskell-game/res/models/Bayonett
   --  print =<< peekTexelBGRA =<< textureData =<< peek tex
 
   print =<< sceneNumMaterials scene
+  print =<< (\x -> peekElemOff x 1) =<< sceneMaterials scene
   mat <- peek =<< sceneMaterials scene
-  print =<< materialTexture mat TextureTypeDiffuse
+  print =<< materialTexture mat TextureTypeAmbient
   
   releaseImport scene
