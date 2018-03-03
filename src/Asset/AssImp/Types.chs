@@ -507,11 +507,20 @@ peekMaterialProperties m = do
    alloca- `CUInt' peek*} -> `Return'
 #}
 
+{#fun aiGetMaterialTextureCount as getMaterialTextureCount
+ { `MaterialPtr',
+   `TextureType' } -> `Int'
+#}
+
 materialTexture :: MaterialPtr -> TextureType -> IO (Maybe FilePath)
 materialTexture m tt = do
-  (r, s, _, _, _, _, _, _) <- getMaterialTexture m tt 0
-  if r == ReturnSuccess
-    then return (Just s)
+  n <- getMaterialTextureCount m tt
+  if n > 0 
+    then do
+    (r, s, _, _, _, _, _, _) <- getMaterialTexture m tt 0
+    if r == ReturnSuccess
+      then return $ Just s
+      else return Nothing
     else return Nothing
 
 #include <assimp/anim.h>
