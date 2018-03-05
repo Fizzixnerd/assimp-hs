@@ -4,9 +4,7 @@ module Lib where
 
 import Asset.AssImp.Types
 import Asset.AssImp.Import
-import Control.Monad
 import Foreign
-import Foreign.C.Types
 import System.Directory
 
 someFunc :: IO ()
@@ -36,17 +34,22 @@ someFunc = withCurrentDirectory "/home/matt/src/haskell-game/res/models/Bayonett
   print =<< peekZVector3D =<< peek =<< meshTextureCoords m1
 
   fces <- bufferFaces m1
-  print =<< (peekElemOff (fst fces) 5)
+  print =<< peekElemOff (fst fces) 5
   print $ snd fces
 
   print =<< sceneNumTextures scene
-  tex <- sceneTextures scene
-  print =<< (peekAIString $ nodeName root)
-  --  print =<< peekTexelBGRA =<< textureData =<< peek tex
+  -- tex <- sceneTextures scene
+  print =<< peekAIString (nodeName root)
+  -- print =<< peekTexelBGRA =<< textureData =<< peek tex
 
   print =<< sceneNumMaterials scene
-  print =<< (\x -> peekElemOff x 1) =<< sceneMaterials scene
+  print =<< (`peekElemOff` 1) =<< sceneMaterials scene
   mat <- peek =<< sceneMaterials scene
-  print =<< materialTexture mat TextureTypeAmbient
-  
+  print =<< materialTexture mat TextureTypeEmmisive
+  print =<< materialColorDiffuse mat
+  print =<< materialColorAmbient mat
+  print =<< materialColorSpecular mat
+  print =<< materialShininess mat
+  print =<< materialShininessStrength mat
+
   releaseImport scene

@@ -14,11 +14,36 @@ import qualified Data.Vector.Storable as V
 
 #include <assimp/types.h>
 
+maxNumberTextureCoords :: Int
+maxNumberTextureCoords = 8
+
 type AIReal = {#type ai_real#}
 
 {#pointer *aiPlane as Plane newtype#}
 {#pointer *aiRay as Ray newtype#}
-{#pointer *aiColor3D as Color3D newtype#}
+
+data Color3D = Color3D
+  { r3D :: Float
+  , g3D :: Float
+  , b3D :: Float
+  } deriving (Eq, Ord, Show)
+
+{#pointer *aiColor3D as Color3DPtr -> Color3D#}
+
+instance Storable Color3D where
+  sizeOf _ = 3 * sizeOf (0 :: Float)
+  alignment _ = alignment (0 :: Float)
+  peek ptr = do
+    let ptr' = castPtr ptr :: Ptr Float
+    r <- peek ptr'
+    g <- peekElemOff ptr' 1
+    b <- peekElemOff ptr' 2
+    return $ Color3D r g b
+  poke ptr (Color3D r g b) = do
+    let ptr' = castPtr ptr :: Ptr Float
+    poke ptr' r
+    pokeElemOff ptr' 1 g
+    pokeElemOff ptr' 2 b
 
 data AIString = AIString
 {#pointer *aiString as AIStringPtr -> AIString#}
@@ -515,13 +540,51 @@ peekMaterialProperties m = do
 materialTexture :: MaterialPtr -> TextureType -> IO (Maybe FilePath)
 materialTexture m tt = do
   n <- getMaterialTextureCount m tt
-  if n > 0 
+  if n > 0
     then do
     (r, s, _, _, _, _, _, _) <- getMaterialTexture m tt 0
     if r == ReturnSuccess
       then return $ Just s
       else return Nothing
     else return Nothing
+
+getMaterialFloat m s t i dummy = alloca $ \ptr -> do
+  ret <- {#call aiGetMaterialFloatArray#} m s t i (castPtr $ ptr `asTypeOf` dummy) nullPtr
+  if ret == 0 -- success
+    then do
+    val <- peek $ castPtr ptr
+    return $ Just val
+    else return Nothing
+
+materialColorDiffuse' :: MaterialPtr -> IO (Maybe Color3D)
+materialColorDiffuse' m =
+  withCString "$clr.diffuse" $ \ptr -> getMaterialFloat m ptr 0 0 ptr
+
+materialColorDiffuse m = maybe (Color3D 0 0 0) id <$> materialColorDiffuse' m
+
+materialColorSpecular' :: MaterialPtr -> IO (Maybe Color3D)
+materialColorSpecular' m =
+  withCString "$clr.specular" $ \ptr -> getMaterialFloat m ptr 0 0 ptr
+
+materialColorSpecular m = maybe (Color3D 0 0 0) id <$> materialColorSpecular' m
+
+materialColorAmbient' :: MaterialPtr -> IO (Maybe Color3D)
+materialColorAmbient' m =
+  withCString "$clr.ambient" $ \ptr -> getMaterialFloat m ptr 0 0 ptr
+
+materialColorAmbient m = maybe (Color3D 0 0 0) id <$> materialColorAmbient' m
+
+materialShininess' :: MaterialPtr -> IO (Maybe Float)
+materialShininess' m =
+  withCString "$mat.shininess" $ \ptr -> getMaterialFloat m ptr 0 0 ptr
+
+materialShininess m = maybe 0 id <$> materialShininess' m
+
+materialShininessStrength' :: MaterialPtr -> IO (Maybe Float)
+materialShininessStrength' m =
+  withCString "$mat.shinpercent" $ \ptr -> getMaterialFloat m ptr 0 0 ptr
+
+materialShininessStrength m = maybe 1.0 id <$> materialShininessStrength' m
 
 #include <assimp/anim.h>
 
