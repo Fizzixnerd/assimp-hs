@@ -269,8 +269,8 @@ meshBones = {#get struct Mesh->mBones#}
 meshMaterialIndex :: MeshPtr -> IO CUInt
 meshMaterialIndex = {#get struct Mesh->mMaterialIndex#}
 
-meshName :: MeshPtr -> IO AIStringPtr
-meshName m = castPtr <$> {#get struct Mesh->mName#} m
+meshName :: MeshPtr -> AIStringPtr
+meshName m = castPtr $ m `plusPtr` {#offsetof Mesh->mName#}
 
 #include <assimp/cimport.h>
 

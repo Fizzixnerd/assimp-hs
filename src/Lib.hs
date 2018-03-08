@@ -51,5 +51,6 @@ someFunc = withCurrentDirectory "/home/matt/src/haskell-game/res/models/Bayonett
   print =<< materialColorSpecular mat
   print =<< materialShininess mat
   print =<< materialShininessStrength mat
+  print =<< (peekAIString . meshName) m1
 
   releaseImport scene
