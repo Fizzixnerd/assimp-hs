@@ -14,10 +14,10 @@ import Foreign.C.Types
 #}
 
 importAndProcessFileFast :: String -> IO ScenePtr
-importAndProcessFileFast s = importFile s 0x808A
+importAndProcessFileFast s = importFile s 0x808B
 
 importAndProcessFileGood :: String -> IO ScenePtr
-importAndProcessFileGood s = importFile s 0x888A
+importAndProcessFileGood s = importFile s 0x888B
 
 
 {#fun aiImportFileEx as importFileEx
